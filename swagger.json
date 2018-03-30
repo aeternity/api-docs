@@ -2,7 +2,7 @@
   "swagger" : "2.0",
   "info" : {
     "description" : "This is the [Aeternity](https://www.aeternity.com/) Epoch API.",
-    "version" : "0.9.0",
+    "version" : "0.10.0",
     "title" : "Aeternity Epoch",
     "termsOfService" : "https://www.aeternity.com/terms/",
     "contact" : {
@@ -43,43 +43,6 @@
   } ],
   "schemes" : [ "http" ],
   "paths" : {
-    "/ping" : {
-      "post" : {
-        "tags" : [ "external", "gossip" ],
-        "description" : "",
-        "operationId" : "Ping",
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "in" : "body",
-          "name" : "body",
-          "description" : "Ping a peer",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/definitions/Ping"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Sample response",
-            "schema" : {
-              "$ref" : "#/definitions/Ping"
-            }
-          },
-          "403" : {
-            "description" : "Not allowed (node is blocked)",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          },
-          "409" : {
-            "description" : "Different genesis blocks",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
     "/top" : {
       "get" : {
         "tags" : [ "external", "gossip" ],
@@ -125,51 +88,6 @@
           },
           "404" : {
             "description" : "Header not found",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/headers-by-hash" : {
-      "get" : {
-        "tags" : [ "external", "gossip" ],
-        "description" : "Get N headers from hash (down)",
-        "operationId" : "GetHeadersByHash",
-        "produces" : [ "application/json" ],
-        "parameters" : [ {
-          "name" : "hash",
-          "in" : "query",
-          "description" : "Hash of first block header to fetch",
-          "required" : true,
-          "type" : "string"
-        }, {
-          "name" : "number",
-          "in" : "query",
-          "description" : "Number of hashes to fetch",
-          "required" : false,
-          "type" : "integer",
-          "default" : 1
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "The headers found",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/Header"
-              }
-            }
-          },
-          "400" : {
-            "description" : "Invalid hash or number",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
-          },
-          "404" : {
-            "description" : "Header(s) not found",
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
@@ -1028,8 +946,8 @@
               "$ref" : "#/definitions/OracleQuestions"
             }
           },
-          "404" : {
-            "description" : "Oracle not found",
+          "400" : {
+            "description" : "Invalid parameters",
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
@@ -1474,6 +1392,13 @@
           "type" : "string",
           "default" : "message_pack",
           "enum" : [ "message_pack", "json" ]
+        }, {
+          "name" : "pending",
+          "in" : "query",
+          "description" : "Include currently pending transactions",
+          "required" : false,
+          "type" : "boolean",
+          "default" : true
         } ],
         "responses" : {
           "200" : {
@@ -1931,6 +1856,12 @@
             "description" : "The count of transactions in the pending block",
             "schema" : {
               "$ref" : "#/definitions/inline_response_200"
+            }
+          },
+          "404" : {
+            "description" : "Pending block not found",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
             }
           }
         }
@@ -2486,14 +2417,6 @@
             "$ref" : "#/definitions/Uri"
           }
         }
-      },
-      "example" : {
-        "difficulty" : 0.80082819046101150206595775671303272247314453125,
-        "genesis_hash" : "genesis_hash",
-        "peers" : [ { }, { } ],
-        "best_hash" : "best_hash",
-        "share" : 19,
-        "source" : "source"
       }
     },
     "Balance" : {
@@ -3391,33 +3314,31 @@
         "calldata" : "calldata"
       }
     },
+    "Peer" : {
+      "type" : "string",
+      "description" : "Aeternity node"
+    },
     "Peers" : {
       "type" : "object",
       "properties" : {
         "peers" : {
           "type" : "array",
-          "description" : "All connected peers",
+          "description" : "All discovered peers",
           "items" : {
-            "$ref" : "#/definitions/Peers_peers"
+            "$ref" : "#/definitions/Peer"
           }
         },
         "blocked" : {
           "type" : "array",
           "description" : "All blocked peers",
           "items" : {
-            "type" : "string"
+            "$ref" : "#/definitions/Peer"
           }
         }
       },
       "example" : {
-        "blocked" : [ "blocked", "blocked" ],
-        "peers" : [ {
-          "last_seen" : 0,
-          "uri" : "uri"
-        }, {
-          "last_seen" : 0,
-          "uri" : "uri"
-        } ]
+        "blocked" : [ null, null ],
+        "peers" : [ { }, { } ]
       }
     },
     "ContractCreateData" : {
@@ -3686,22 +3607,6 @@
           "type" : "integer",
           "format" : "int64"
         }
-      }
-    },
-    "Peers_peers" : {
-      "properties" : {
-        "uri" : {
-          "type" : "string",
-          "description" : "Peer's URI"
-        },
-        "last_seen" : {
-          "type" : "integer",
-          "description" : "Timestamp of last message. If none - 0"
-        }
-      },
-      "example" : {
-        "last_seen" : 0,
-        "uri" : "uri"
       }
     }
   },

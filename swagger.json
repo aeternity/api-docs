@@ -2,7 +2,7 @@
   "swagger" : "2.0",
   "info" : {
     "description" : "This is the [Aeternity](https://www.aeternity.com/) Epoch API.",
-    "version" : "0.15.0",
+    "version" : "0.16.0",
     "title" : "Aeternity Epoch",
     "termsOfService" : "https://www.aeternity.com/terms/",
     "contact" : {
@@ -232,7 +232,7 @@
     "/tx/{tx_hash}/contract-call" : {
       "get" : {
         "tags" : [ "external", "transactions" ],
-        "description" : "Get the call result for a contract_call transaction",
+        "description" : "Get the call result for a contract_create or contract_call transaction",
         "operationId" : "GetContractCallFromTx",
         "produces" : [ "application/json" ],
         "parameters" : [ {
@@ -957,6 +957,41 @@
         }
       }
     },
+    "/poi/contract/{contract}" : {
+      "get" : {
+        "tags" : [ "external", "chain" ],
+        "description" : "Get a proof of inclusion for a contract",
+        "operationId" : "GetContractPoI",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "contract",
+          "in" : "path",
+          "description" : "Contract pubkey to get proof for",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/PoI"
+            }
+          },
+          "400" : {
+            "description" : "Invalid contract key",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Contract not found",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/transactions" : {
       "get" : {
         "tags" : [ "external", "transactions" ],
@@ -1536,72 +1571,69 @@
         }
       }
     },
-    "/account/{account_pubkey}/txs" : {
+    "/account/{account_pubkey}/nonce" : {
       "get" : {
-        "tags" : [ "external", "transactions" ],
-        "description" : "Get accounts's transactions included in blocks in the longest chain",
-        "operationId" : "GetAccountTransactions",
+        "tags" : [ "external", "chain" ],
+        "description" : "Get accounts's last used nonce on chain",
+        "operationId" : "GetAccountNonce",
         "produces" : [ "application/json" ],
         "parameters" : [ {
           "name" : "account_pubkey",
           "in" : "path",
-          "description" : "Account pubkey to show transactions for",
+          "description" : "Account pubkey to show nonce for",
           "required" : true,
           "type" : "string"
-        }, {
-          "name" : "limit",
-          "in" : "query",
-          "description" : "Maximum transactions count to show",
-          "required" : false,
-          "type" : "integer",
-          "default" : 20,
-          "maximum" : 100,
-          "minimum" : 1
-        }, {
-          "name" : "offset",
-          "in" : "query",
-          "description" : "Offset to start transaction list from",
-          "required" : false,
-          "type" : "integer",
-          "default" : 0,
-          "minimum" : 0
-        }, {
-          "name" : "tx_types",
-          "in" : "query",
-          "description" : "Transactions types to show. Comma separated",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "exclude_tx_types",
-          "in" : "query",
-          "description" : "Transactions types not to show. Comma separated. If a tx type appears in both tx_types and exclude_tx_types, it is excluded.",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "tx_encoding",
-          "in" : "query",
-          "description" : "Transactions encoding",
-          "required" : false,
-          "type" : "string",
-          "default" : "message_pack",
-          "enum" : [ "message_pack", "json" ]
-        }, {
-          "name" : "pending",
-          "in" : "query",
-          "description" : "Include currently pending transactions",
-          "required" : false,
-          "type" : "boolean",
-          "default" : true
         } ],
         "responses" : {
           "200" : {
             "description" : "successful operation",
             "schema" : {
-              "$ref" : "#/definitions/TxObjects"
+              "$ref" : "#/definitions/Nonce"
             }
           },
           "400" : {
-            "description" : "Invalid account hash",
+            "description" : "Invalid account_pubkey provided",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Account not found",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/account/{account_pubkey}/pending_transactions" : {
+      "get" : {
+        "tags" : [ "external", "transactions" ],
+        "description" : "Get accounts's pending transactions from the mempool",
+        "operationId" : "GetAccountPendingTransactions",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "account_pubkey",
+          "in" : "path",
+          "description" : "Account pubkey to search for in mempool",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Transactions"
+            }
+          },
+          "400" : {
+            "description" : "Invalid account_pubkey provided",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Account not found",
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
@@ -2367,6 +2399,38 @@
         }
       }
     },
+    "/contract/decode-data" : {
+      "post" : {
+        "tags" : [ "external", "dev" ],
+        "description" : "Decode Sophia data encoded according to Sophia ABI.",
+        "operationId" : "DecodeData",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "Binary data in Sophia ABI format",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/SophiaBinaryData"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Json encoded data",
+            "schema" : {
+              "$ref" : "#/definitions/SophiaJsonData"
+            }
+          },
+          "400" : {
+            "description" : "Invalid data",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/contract/encode-calldata" : {
       "post" : {
         "tags" : [ "external", "dev" ],
@@ -2588,6 +2652,18 @@
         "balance" : 0
       }
     },
+    "Nonce" : {
+      "type" : "object",
+      "properties" : {
+        "nonce" : {
+          "type" : "integer",
+          "format" : "int64"
+        }
+      },
+      "example" : {
+        "nonce" : 0
+      }
+    },
     "Tx" : {
       "type" : "object",
       "properties" : {
@@ -2619,7 +2695,7 @@
     },
     "SpendTx" : {
       "type" : "object",
-      "required" : [ "amount", "fee", "payload", "recipient_pubkey", "ttl" ],
+      "required" : [ "amount", "fee", "payload", "recipient_pubkey" ],
       "properties" : {
         "recipient_pubkey" : {
           "$ref" : "#/definitions/EncodedHash"
@@ -2658,9 +2734,17 @@
         "nonce" : 5
       }
     },
+    "SpendTxResponse" : {
+      "type" : "object",
+      "properties" : {
+        "tx_hash" : {
+          "$ref" : "#/definitions/EncodedHash"
+        }
+      }
+    },
     "OracleRegisterTx" : {
       "type" : "object",
-      "required" : [ "fee", "oracle_ttl", "query_fee", "query_format", "response_format", "ttl" ],
+      "required" : [ "fee", "oracle_ttl", "query_fee", "query_format", "response_format" ],
       "properties" : {
         "query_format" : {
           "type" : "string"
@@ -2722,7 +2806,7 @@
     },
     "OracleExtendTx" : {
       "type" : "object",
-      "required" : [ "fee", "oracle_ttl", "ttl" ],
+      "required" : [ "fee", "oracle_ttl" ],
       "properties" : {
         "fee" : {
           "type" : "integer",
@@ -2756,7 +2840,7 @@
     },
     "OracleQueryTx" : {
       "type" : "object",
-      "required" : [ "fee", "oracle_pubkey", "query", "query_fee", "query_ttl", "response_ttl", "ttl" ],
+      "required" : [ "fee", "oracle_pubkey", "query", "query_fee", "query_ttl", "response_ttl" ],
       "properties" : {
         "oracle_pubkey" : {
           "type" : "string"
@@ -2811,7 +2895,7 @@
     },
     "OracleResponseTx" : {
       "type" : "object",
-      "required" : [ "fee", "query_id", "response", "ttl" ],
+      "required" : [ "fee", "query_id", "response" ],
       "properties" : {
         "query_id" : {
           "$ref" : "#/definitions/EncodedHash"
@@ -2922,7 +3006,7 @@
     },
     "NamePreclaimTx" : {
       "type" : "object",
-      "required" : [ "commitment", "fee", "ttl" ],
+      "required" : [ "commitment", "fee" ],
       "properties" : {
         "commitment" : {
           "type" : "string"
@@ -2953,7 +3037,7 @@
     },
     "NameClaimTx" : {
       "type" : "object",
-      "required" : [ "fee", "name", "name_salt", "ttl" ],
+      "required" : [ "fee", "name", "name_salt" ],
       "properties" : {
         "name" : {
           "type" : "string"
@@ -2989,7 +3073,7 @@
     },
     "NameUpdateTx" : {
       "type" : "object",
-      "required" : [ "client_ttl", "fee", "name_hash", "name_ttl", "pointers", "ttl" ],
+      "required" : [ "client_ttl", "fee", "name_hash", "name_ttl", "pointers" ],
       "properties" : {
         "name_hash" : {
           "type" : "string"
@@ -3034,7 +3118,7 @@
     },
     "NameTransferTx" : {
       "type" : "object",
-      "required" : [ "fee", "name_hash", "recipient_pubkey", "ttl" ],
+      "required" : [ "fee", "name_hash", "recipient_pubkey" ],
       "properties" : {
         "name_hash" : {
           "type" : "string"
@@ -3069,7 +3153,7 @@
     },
     "NameRevokeTx" : {
       "type" : "object",
-      "required" : [ "fee", "name_hash", "ttl" ],
+      "required" : [ "fee", "name_hash" ],
       "properties" : {
         "name_hash" : {
           "type" : "string"
@@ -3122,7 +3206,7 @@
     },
     "ChannelCreateTx" : {
       "type" : "object",
-      "required" : [ "channel_reserve", "fee", "initiator", "initiator_amount", "lock_period", "push_amount", "responder", "responder_amount", "ttl" ],
+      "required" : [ "channel_reserve", "fee", "initiator", "initiator_amount", "lock_period", "push_amount", "responder", "responder_amount", "state_hash" ],
       "properties" : {
         "initiator" : {
           "$ref" : "#/definitions/EncodedHash"
@@ -3169,11 +3253,16 @@
           "type" : "integer",
           "format" : "int64",
           "minimum" : 0
+        },
+        "state_hash" : {
+          "description" : "Root hash of the channel's internal state tree",
+          "$ref" : "#/definitions/EncodedHash"
         }
       },
       "example" : {
         "responder_amount" : 0,
         "initiator_amount" : 0,
+        "state_hash" : null,
         "initiator" : { },
         "fee" : 0,
         "responder" : null,
@@ -3186,7 +3275,7 @@
     },
     "ChannelDepositTx" : {
       "type" : "object",
-      "required" : [ "amount", "channel_id", "fee", "from", "nonce", "ttl" ],
+      "required" : [ "amount", "channel_id", "fee", "from", "nonce", "round", "state_hash" ],
       "properties" : {
         "channel_id" : {
           "type" : "string"
@@ -3213,10 +3302,22 @@
           "type" : "integer",
           "format" : "int64",
           "minimum" : 0
+        },
+        "state_hash" : {
+          "description" : "Root hash of the channel's internal state tree after the deposit had been applied to it",
+          "$ref" : "#/definitions/EncodedHash"
+        },
+        "round" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Channel's next round",
+          "minimum" : 0
         }
       },
       "example" : {
         "amount" : 0,
+        "round" : 0,
+        "state_hash" : null,
         "fee" : 0,
         "from" : { },
         "channel_id" : "channel_id",
@@ -3226,7 +3327,7 @@
     },
     "ChannelWithdrawalTx" : {
       "type" : "object",
-      "required" : [ "amount", "channel_id", "fee", "nonce", "to", "ttl" ],
+      "required" : [ "amount", "channel_id", "fee", "nonce", "round", "state_hash", "to" ],
       "properties" : {
         "channel_id" : {
           "type" : "string"
@@ -3253,10 +3354,22 @@
           "type" : "integer",
           "format" : "int64",
           "minimum" : 0
+        },
+        "state_hash" : {
+          "description" : "Root hash of the channel's internal state tree after the withdraw had been applied to it",
+          "$ref" : "#/definitions/EncodedHash"
+        },
+        "round" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Channel's next round",
+          "minimum" : 0
         }
       },
       "example" : {
         "amount" : 0,
+        "round" : 0,
+        "state_hash" : null,
         "fee" : 0,
         "to" : { },
         "channel_id" : "channel_id",
@@ -3266,7 +3379,7 @@
     },
     "ChannelCloseMutualTx" : {
       "type" : "object",
-      "required" : [ "channel_id", "fee", "initiator_amount", "nonce", "responder_amount", "ttl" ],
+      "required" : [ "channel_id", "fee", "initiator_amount", "nonce", "responder_amount" ],
       "properties" : {
         "channel_id" : {
           "type" : "string"
@@ -3308,7 +3421,7 @@
     },
     "ChannelCloseSoloTx" : {
       "type" : "object",
-      "required" : [ "channel_id", "fee", "from", "payload", "ttl" ],
+      "required" : [ "channel_id", "fee", "from", "payload", "poi" ],
       "properties" : {
         "channel_id" : {
           "type" : "string"
@@ -3333,12 +3446,17 @@
           "type" : "integer",
           "format" : "int64",
           "minimum" : 0
+        },
+        "poi" : {
+          "type" : "string",
+          "description" : "Proof of inclusion containing information for closing the channel"
         }
       },
       "example" : {
         "payload" : "payload",
         "fee" : 0,
         "from" : { },
+        "poi" : "poi",
         "channel_id" : "channel_id",
         "ttl" : 0,
         "nonce" : 0
@@ -3346,7 +3464,7 @@
     },
     "ChannelSlashTx" : {
       "type" : "object",
-      "required" : [ "channel_id", "fee", "from", "payload", "ttl" ],
+      "required" : [ "channel_id", "fee", "from", "payload", "poi" ],
       "properties" : {
         "channel_id" : {
           "type" : "string"
@@ -3371,12 +3489,17 @@
           "type" : "integer",
           "format" : "int64",
           "minimum" : 0
+        },
+        "poi" : {
+          "type" : "string",
+          "description" : "Proof of inclusion containing information for closing the channel"
         }
       },
       "example" : {
         "payload" : "payload",
         "fee" : 0,
         "from" : { },
+        "poi" : "poi",
         "channel_id" : "channel_id",
         "ttl" : 0,
         "nonce" : 0
@@ -3384,7 +3507,7 @@
     },
     "ChannelSettleTx" : {
       "type" : "object",
-      "required" : [ "channel_id", "fee", "from", "initiator_amount", "nonce", "ttl" ],
+      "required" : [ "channel_id", "fee", "from", "initiator_amount", "nonce" ],
       "properties" : {
         "channel_id" : {
           "type" : "string"
@@ -3769,7 +3892,7 @@
     },
     "ContractCallObject" : {
       "type" : "object",
-      "required" : [ "caller_address", "caller_nonce", "contract_address", "gas_used", "height", "return_type", "return_value" ],
+      "required" : [ "caller_address", "caller_nonce", "contract_address", "gas_price", "gas_used", "height", "return_type", "return_value" ],
       "properties" : {
         "caller_address" : {
           "$ref" : "#/definitions/EncodedHash"
@@ -3782,6 +3905,9 @@
         },
         "contract_address" : {
           "$ref" : "#/definitions/EncodedHash"
+        },
+        "gas_price" : {
+          "type" : "integer"
         },
         "gas_used" : {
           "type" : "integer"
@@ -3796,10 +3922,11 @@
         }
       },
       "example" : {
+        "gas_price" : 1,
         "return_type" : "return_type",
         "caller_address" : { },
         "return_value" : "return_value",
-        "gas_used" : 1,
+        "gas_used" : 5,
         "caller_nonce" : 0,
         "contract_address" : null,
         "height" : 6
@@ -3884,6 +4011,35 @@
         "calldata" : "calldata"
       }
     },
+    "SophiaBinaryData" : {
+      "type" : "object",
+      "required" : [ "data", "sophia-type" ],
+      "properties" : {
+        "sophia-type" : {
+          "type" : "string"
+        },
+        "data" : {
+          "type" : "string"
+        }
+      },
+      "example" : {
+        "data" : "data",
+        "sophia-type" : "sophia-type"
+      }
+    },
+    "SophiaJsonData" : {
+      "type" : "object",
+      "required" : [ "data" ],
+      "properties" : {
+        "data" : {
+          "type" : "object",
+          "properties" : { }
+        }
+      },
+      "example" : {
+        "data" : "{}"
+      }
+    },
     "Peer" : {
       "type" : "string",
       "description" : "Aeternity node"
@@ -3913,7 +4069,7 @@
     },
     "ContractCreateData" : {
       "type" : "object",
-      "required" : [ "amount", "call_data", "code", "deposit", "fee", "gas", "gas_price", "owner", "ttl", "vm_version" ],
+      "required" : [ "amount", "call_data", "code", "deposit", "fee", "gas", "gas_price", "owner", "vm_version" ],
       "properties" : {
         "owner" : {
           "type" : "string",
@@ -3984,7 +4140,7 @@
     },
     "ContractCallData" : {
       "type" : "object",
-      "required" : [ "amount", "call_data", "caller", "contract", "fee", "gas", "gas_price", "ttl", "vm_version" ],
+      "required" : [ "amount", "call_data", "caller", "contract", "fee", "gas", "gas_price", "vm_version" ],
       "properties" : {
         "caller" : {
           "type" : "string",
@@ -4049,7 +4205,7 @@
     },
     "ContractCallCompute" : {
       "type" : "object",
-      "required" : [ "amount", "arguments", "caller", "contract", "fee", "function", "gas", "gas_price", "ttl", "vm_version" ],
+      "required" : [ "amount", "arguments", "caller", "contract", "fee", "function", "gas", "gas_price", "vm_version" ],
       "properties" : {
         "caller" : {
           "type" : "string",
@@ -4156,6 +4312,19 @@
           }
         }
       } ]
+    },
+    "PoI" : {
+      "type" : "object",
+      "required" : [ "poi" ],
+      "properties" : {
+        "poi" : {
+          "type" : "string",
+          "description" : "Proof of inclusion"
+        }
+      },
+      "example" : {
+        "poi" : "poi"
+      }
     },
     "inline_response_200" : {
       "properties" : {

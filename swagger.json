@@ -2,7 +2,7 @@
   "swagger" : "2.0",
   "info" : {
     "description" : "This is the [Aeternity](https://www.aeternity.com/) Epoch API.",
-    "version" : "0.23.0",
+    "version" : "0.24.0",
     "title" : "Aeternity Epoch",
     "termsOfService" : "https://www.aeternity.com/terms/",
     "contact" : {
@@ -58,7 +58,10 @@
         "parameters" : [ ],
         "responses" : {
           "200" : {
-            "description" : "Successful operation"
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/KeyBlockOrMicroBlockHeader"
+            }
           },
           "404" : {
             "description" : "Block not found",
@@ -1042,7 +1045,7 @@
           "name" : "body",
           "required" : true,
           "schema" : {
-            "$ref" : "#/definitions/ContractCreateData"
+            "$ref" : "#/definitions/ContractCreateTx"
           }
         } ],
         "responses" : {
@@ -1116,7 +1119,7 @@
           "name" : "body",
           "required" : true,
           "schema" : {
-            "$ref" : "#/definitions/ContractCallData"
+            "$ref" : "#/definitions/ContractCallTx"
           }
         } ],
         "responses" : {
@@ -2138,10 +2141,49 @@
         "pof_hash" : "pof_hash",
         "prev_hash" : null,
         "prev_key_hash" : null,
-        "time" : 6,
-        "version" : 1,
-        "hash" : { },
-        "height" : 0
+        "time" : 7,
+        "version" : 9,
+        "hash" : null,
+        "height" : 2
+      }
+    },
+    "KeyBlockOrMicroBlockHeader" : {
+      "type" : "object",
+      "properties" : {
+        "key_block" : {
+          "$ref" : "#/definitions/KeyBlock"
+        },
+        "micro_block" : {
+          "$ref" : "#/definitions/MicroBlockHeader"
+        }
+      },
+      "example" : {
+        "micro_block" : {
+          "txs_hash" : null,
+          "state_hash" : null,
+          "signature" : null,
+          "pof_hash" : "pof_hash",
+          "prev_hash" : null,
+          "prev_key_hash" : null,
+          "time" : 7,
+          "version" : 9,
+          "hash" : null,
+          "height" : 2
+        },
+        "key_block" : {
+          "beneficiary" : null,
+          "state_hash" : null,
+          "prev_hash" : null,
+          "pow" : "",
+          "prev_key_hash" : null,
+          "time" : 5,
+          "nonce" : 1,
+          "version" : 5,
+          "hash" : { },
+          "miner" : null,
+          "height" : 0,
+          "target" : 6
+        }
       }
     },
     "GenericTxs" : {
@@ -3149,9 +3191,12 @@
     },
     "ChannelCloseMutualTx" : {
       "type" : "object",
-      "required" : [ "channel_id", "fee", "initiator_amount_final", "nonce", "responder_amount_final" ],
+      "required" : [ "channel_id", "fee", "from_id", "initiator_amount_final", "nonce", "responder_amount_final" ],
       "properties" : {
         "channel_id" : {
+          "$ref" : "#/definitions/EncodedHash"
+        },
+        "from_id" : {
           "$ref" : "#/definitions/EncodedHash"
         },
         "initiator_amount_final" : {
@@ -3181,6 +3226,7 @@
         }
       },
       "example" : {
+        "from_id" : null,
         "responder_amount_final" : 0,
         "fee" : 0,
         "initiator_amount_final" : 0,
@@ -3565,6 +3611,13 @@
         "$ref" : "#/definitions/ChannelSettleTx"
       } ]
     },
+    "ChannelSnapshotSoloTxJSON" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/GenericTx"
+      }, {
+        "$ref" : "#/definitions/ChannelSnapshotSoloTx"
+      } ]
+    },
     "SpendTxJSON" : {
       "allOf" : [ {
         "$ref" : "#/definitions/GenericTx"
@@ -3600,53 +3653,53 @@
         "$ref" : "#/definitions/OracleRespondTx"
       } ]
     },
-    "NamePreclaimTxObject" : {
+    "NamePreclaimTxJSON" : {
       "allOf" : [ {
         "$ref" : "#/definitions/GenericTx"
       }, {
         "$ref" : "#/definitions/NamePreclaimTx"
       } ]
     },
-    "NameClaimTxObject" : {
+    "NameClaimTxJSON" : {
       "allOf" : [ {
         "$ref" : "#/definitions/GenericTx"
       }, {
         "$ref" : "#/definitions/NameClaimTx"
       } ]
     },
-    "NameUpdateTxObject" : {
+    "NameUpdateTxJSON" : {
       "allOf" : [ {
         "$ref" : "#/definitions/GenericTx"
       }, {
         "$ref" : "#/definitions/NameUpdateTx"
       } ]
     },
-    "NameTransferTxObject" : {
+    "NameTransferTxJSON" : {
       "allOf" : [ {
         "$ref" : "#/definitions/GenericTx"
       }, {
         "$ref" : "#/definitions/NameTransferTx"
       } ]
     },
-    "NameRevokeTxObject" : {
+    "NameRevokeTxJSON" : {
       "allOf" : [ {
         "$ref" : "#/definitions/GenericTx"
       }, {
         "$ref" : "#/definitions/NameRevokeTx"
       } ]
     },
-    "ContractCreateTxObject" : {
+    "ContractCreateTxJSON" : {
       "allOf" : [ {
         "$ref" : "#/definitions/GenericTx"
       }, {
-        "$ref" : "#/definitions/ContractCreateData"
+        "$ref" : "#/definitions/ContractCreateTx"
       } ]
     },
-    "ContractCallTxObject" : {
+    "ContractCallTxJSON" : {
       "allOf" : [ {
         "$ref" : "#/definitions/GenericTx"
       }, {
-        "$ref" : "#/definitions/ContractCallData"
+        "$ref" : "#/definitions/ContractCallTx"
       } ]
     },
     "ContractCallObject" : {
@@ -3672,8 +3725,7 @@
           "type" : "integer"
         },
         "return_value" : {
-          "type" : "string",
-          "description" : "Hex encoded return value of the call"
+          "$ref" : "#/definitions/EncodedByteArray"
         },
         "return_type" : {
           "type" : "string",
@@ -3683,7 +3735,7 @@
       "example" : {
         "gas_price" : 1,
         "return_type" : "return_type",
-        "return_value" : "return_value",
+        "return_value" : { },
         "caller_id" : { },
         "contract_id" : null,
         "gas_used" : 5,
@@ -3754,10 +3806,10 @@
       },
       "example" : {
         "store" : [ {
-          "value" : "value",
+          "value" : { },
           "key" : "key"
         }, {
-          "value" : "value",
+          "value" : { },
           "key" : "key"
         } ]
       }
@@ -3831,12 +3883,15 @@
       "required" : [ "calldata" ],
       "properties" : {
         "calldata" : {
-          "type" : "string"
+          "$ref" : "#/definitions/EncodedByteArray"
         }
       },
       "example" : {
-        "calldata" : "calldata"
+        "calldata" : { }
       }
+    },
+    "EncodedByteArray" : {
+      "type" : "string"
     },
     "SophiaBinaryData" : {
       "type" : "object",
@@ -3895,7 +3950,7 @@
         "peers" : [ { }, { } ]
       }
     },
-    "ContractCreateData" : {
+    "ContractCreateTx" : {
       "type" : "object",
       "required" : [ "amount", "call_data", "code", "deposit", "fee", "gas", "gas_price", "owner_id", "vm_version" ],
       "properties" : {
@@ -3948,8 +4003,8 @@
           "minimum" : 0
         },
         "call_data" : {
-          "type" : "string",
-          "description" : "Contract call data"
+          "description" : "Contract call data",
+          "$ref" : "#/definitions/EncodedByteArray"
         }
       },
       "example" : {
@@ -3957,7 +4012,7 @@
         "vm_version" : 153,
         "amount" : 0,
         "code" : "code",
-        "call_data" : "call_data",
+        "call_data" : { },
         "owner_id" : { },
         "fee" : 0,
         "gas" : 0,
@@ -4037,7 +4092,7 @@
         "ttl" : 0
       }
     },
-    "ContractCallData" : {
+    "ContractCallTx" : {
       "type" : "object",
       "required" : [ "amount", "call_data", "caller_id", "contract_id", "fee", "gas", "gas_price", "vm_version" ],
       "properties" : {
@@ -4085,15 +4140,15 @@
           "minimum" : 0
         },
         "call_data" : {
-          "type" : "string",
-          "description" : "Contract call data"
+          "description" : "Contract call data",
+          "$ref" : "#/definitions/EncodedByteArray"
         }
       },
       "example" : {
         "gas_price" : 0,
         "vm_version" : 153,
         "amount" : 0,
-        "call_data" : "call_data",
+        "call_data" : { },
         "caller_id" : { },
         "contract_id" : null,
         "fee" : 0,
@@ -4353,8 +4408,8 @@
             "description" : "Amount of tokens to deposit to the new contract"
           },
           "call_data" : {
-            "type" : "string",
-            "description" : "Contract call data"
+            "description" : "Contract call data",
+            "$ref" : "#/definitions/EncodedByteArray"
           }
         }
       } ]
@@ -4395,8 +4450,8 @@
             "description" : "Gas price for the contract call"
           },
           "call_data" : {
-            "type" : "string",
-            "description" : "Contract call data"
+            "description" : "Contract call data",
+            "$ref" : "#/definitions/EncodedByteArray"
           }
         }
       } ]
@@ -4453,11 +4508,11 @@
           "type" : "string"
         },
         "value" : {
-          "type" : "string"
+          "$ref" : "#/definitions/EncodedByteArray"
         }
       },
       "example" : {
-        "value" : "value",
+        "value" : { },
         "key" : "key"
       }
     }

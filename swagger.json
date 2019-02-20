@@ -2,7 +2,7 @@
   "swagger" : "2.0",
   "info" : {
     "description" : "This is the [Aeternity](https://www.aeternity.com/) node API.",
-    "version" : "1.4.0",
+    "version" : "2.0.0-rc.1",
     "title" : "Aeternity node",
     "termsOfService" : "https://www.aeternity.com/terms/",
     "contact" : {
@@ -527,6 +527,90 @@
           },
           "404" : {
             "description" : "Account not found",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{pubkey}/height/{height}" : {
+      "get" : {
+        "tags" : [ "external", "account" ],
+        "description" : "Get an account by public key after the opening key block of the generation at height",
+        "operationId" : "GetAccountByPubkeyAndHeight",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "pubkey",
+          "in" : "path",
+          "description" : "The public key of the account",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "height",
+          "in" : "path",
+          "description" : "The height of the key block",
+          "required" : true,
+          "type" : "integer",
+          "minimum" : 0
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Account"
+            }
+          },
+          "400" : {
+            "description" : "Invalid public key or invalid height",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Account not found or height not available",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{pubkey}/hash/{hash}" : {
+      "get" : {
+        "tags" : [ "external", "account" ],
+        "description" : "Get an account by public key after the block indicated by hash",
+        "operationId" : "GetAccountByPubkeyAndHash",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "pubkey",
+          "in" : "path",
+          "description" : "The public key of the account",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "hash",
+          "in" : "path",
+          "description" : "The hash of the block",
+          "required" : true,
+          "type" : "string",
+          "minimum" : 0
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Account"
+            }
+          },
+          "400" : {
+            "description" : "Invalid public key or invalid hash",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Account not found or hash not available",
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
@@ -1081,7 +1165,7 @@
     "/debug/contracts/create/compute" : {
       "post" : {
         "tags" : [ "internal", "contract", "debug" ],
-        "description" : "Compute the call_data for SOPHIA and get a contract_create transaction object",
+        "description" : "(DEPRECATED to-be-removed in 3.0) - Compute the call_data for SOPHIA and get a contract_create transaction object",
         "operationId" : "PostContractCreateCompute",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
@@ -1112,7 +1196,8 @@
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "deprecated" : true
       }
     },
     "/debug/contracts/call" : {
@@ -1155,7 +1240,7 @@
     "/debug/contracts/call/compute" : {
       "post" : {
         "tags" : [ "internal", "contract", "debug" ],
-        "description" : "Compute the call_data for SOPHIA and get contract_call transaction object",
+        "description" : "(DEPRECATED to-be-removed in 3.0) - Compute the call_data for SOPHIA and get contract_call transaction object",
         "operationId" : "PostContractCallCompute",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
@@ -1186,7 +1271,8 @@
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "deprecated" : true
       }
     },
     "/debug/oracles/register" : {
@@ -1925,7 +2011,7 @@
     "/debug/contracts/code/compile" : {
       "post" : {
         "tags" : [ "internal", "contract", "debug" ],
-        "description" : "Compile a sophia contract from source and return byte code",
+        "description" : "(DEPRECATED to-be-removed in 3.0) - Compile a sophia contract from source and return byte code",
         "operationId" : "CompileContract",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
@@ -1951,13 +2037,14 @@
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "deprecated" : true
       }
     },
     "/debug/contracts/code/call" : {
       "post" : {
         "tags" : [ "internal", "contract", "debug" ],
-        "description" : "Call a sophia function with a given name and argument in the given bytecode off chain.",
+        "description" : "(DEPRECATED to-be-removed in 3.0) - Call a sophia function with a given name and argument in the given bytecode off chain.",
         "operationId" : "CallContract",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
@@ -1983,7 +2070,8 @@
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "deprecated" : true
       }
     },
     "/debug/transactions/dry-run" : {
@@ -2021,7 +2109,7 @@
     "/debug/contracts/code/decode-data" : {
       "post" : {
         "tags" : [ "internal", "contract", "debug" ],
-        "description" : "Decode Sophia return data encoded according to Sophia ABI.",
+        "description" : "(DEPRECATED to-be-removed in 3.0) - Decode Sophia return data encoded according to Sophia ABI.",
         "operationId" : "DecodeData",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
@@ -2047,13 +2135,14 @@
               "$ref" : "#/definitions/Error"
             }
           }
-        }
+        },
+        "deprecated" : true
       }
     },
     "/debug/contracts/code/encode-calldata" : {
       "post" : {
         "tags" : [ "internal", "contract", "debug" ],
-        "description" : "Encode sophia data and function name according to sophia ABI.",
+        "description" : "(DEPRECATED to-be-removed in 3.0) - Encode sophia data and function name according to sophia ABI.",
         "operationId" : "EncodeCalldata",
         "consumes" : [ "application/json" ],
         "produces" : [ "application/json" ],
@@ -2079,6 +2168,37 @@
               "$ref" : "#/definitions/Error"
             }
           }
+        },
+        "deprecated" : true
+      }
+    },
+    "/debug/token-supply/height/{height}" : {
+      "get" : {
+        "tags" : [ "internal", "debug" ],
+        "description" : "Get total token supply at height",
+        "operationId" : "GetTokenSupplyByHeight",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "height",
+          "in" : "path",
+          "description" : "The key block height after which the tokens are summed",
+          "required" : true,
+          "type" : "integer",
+          "minimum" : 0
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Total token supply at height divided in categories",
+            "schema" : {
+              "$ref" : "#/definitions/TokenSupply"
+            }
+          },
+          "400" : {
+            "description" : "Height not available",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
         }
       }
     }
@@ -2099,7 +2219,7 @@
     },
     "KeyBlock" : {
       "type" : "object",
-      "required" : [ "beneficiary", "hash", "height", "miner", "prev_hash", "prev_key_hash", "state_hash", "target", "time", "version" ],
+      "required" : [ "beneficiary", "hash", "height", "info", "miner", "prev_hash", "prev_key_hash", "state_hash", "target", "time", "version" ],
       "properties" : {
         "hash" : {
           "$ref" : "#/definitions/EncodedHash"
@@ -2141,21 +2261,25 @@
         "version" : {
           "type" : "integer",
           "format" : "int64"
+        },
+        "info" : {
+          "$ref" : "#/definitions/EncodedByteArray"
         }
       },
       "example" : {
+        "prev_hash" : null,
+        "nonce" : 1,
+        "version" : 5,
+        "miner" : null,
+        "target" : 6,
         "beneficiary" : null,
         "state_hash" : null,
-        "prev_hash" : null,
         "pow" : "",
         "prev_key_hash" : null,
         "time" : 5,
-        "nonce" : 1,
-        "version" : 5,
         "hash" : { },
-        "miner" : null,
         "height" : 0,
-        "target" : 6
+        "info" : { }
       }
     },
     "MicroBlockHeader" : {
@@ -2234,18 +2358,19 @@
           "height" : 2
         },
         "key_block" : {
+          "prev_hash" : null,
+          "nonce" : 1,
+          "version" : 5,
+          "miner" : null,
+          "target" : 6,
           "beneficiary" : null,
           "state_hash" : null,
-          "prev_hash" : null,
           "pow" : "",
           "prev_key_hash" : null,
           "time" : 5,
-          "nonce" : 1,
-          "version" : 5,
           "hash" : { },
-          "miner" : null,
           "height" : 0,
-          "target" : 6
+          "info" : { }
         }
       }
     },
@@ -2323,7 +2448,7 @@
     },
     "RegisteredOracle" : {
       "type" : "object",
-      "required" : [ "id", "query_fee", "query_format", "response_format", "ttl", "vm_version" ],
+      "required" : [ "id", "query_fee", "query_format", "response_format", "ttl" ],
       "properties" : {
         "id" : {
           "$ref" : "#/definitions/EncodedHash"
@@ -2343,13 +2468,19 @@
         },
         "vm_version" : {
           "type" : "integer",
-          "format" : "int64",
-          "minimum" : 0
+          "minimum" : 0,
+          "maximum" : 65535
+        },
+        "abi_version" : {
+          "type" : "integer",
+          "minimum" : 0,
+          "maximum" : 65535
         }
       },
       "example" : {
-        "vm_version" : 0,
+        "vm_version" : 9606,
         "response_format" : "response_format",
+        "abi_version" : 39072,
         "id" : { },
         "query_fee" : 0,
         "ttl" : 6,
@@ -2523,12 +2654,17 @@
         },
         "vm_version" : {
           "type" : "integer",
-          "format" : "int64",
-          "minimum" : 0
+          "minimum" : 0,
+          "maximum" : 65535
+        },
+        "abi_version" : {
+          "type" : "integer",
+          "minimum" : 0,
+          "maximum" : 65535
         }
       },
       "example" : {
-        "vm_version" : 0,
+        "vm_version" : 36944,
         "response_format" : "response_format",
         "account_id" : { },
         "fee" : 1,
@@ -2536,6 +2672,7 @@
           "type" : "delta",
           "value" : 1
         },
+        "abi_version" : 15087,
         "query_fee" : 0,
         "nonce" : 6,
         "ttl" : 5,
@@ -3845,7 +3982,12 @@
         "vm_version" : {
           "type" : "integer",
           "minimum" : 0,
-          "maximum" : 255
+          "maximum" : 65535
+        },
+        "abi_version" : {
+          "type" : "integer",
+          "minimum" : 0,
+          "maximum" : 65535
         },
         "log" : {
           "type" : "string"
@@ -3864,11 +4006,12 @@
         }
       },
       "example" : {
-        "vm_version" : 20,
+        "vm_version" : 5248,
         "log" : "log",
         "owner_id" : null,
         "active" : true,
-        "deposit" : 6,
+        "deposit" : 1,
+        "abi_version" : 39500,
         "referrer_ids" : [ null, null ],
         "id" : { }
       }
@@ -4182,7 +4325,13 @@
           "type" : "integer",
           "description" : "Virtual machine's version",
           "minimum" : 0,
-          "maximum" : 255
+          "maximum" : 65535
+        },
+        "abi_version" : {
+          "type" : "integer",
+          "description" : "ABI version",
+          "minimum" : 0,
+          "maximum" : 65535
         },
         "deposit" : {
           "type" : "integer",
@@ -4221,7 +4370,7 @@
       },
       "example" : {
         "gas_price" : 0,
-        "vm_version" : 153,
+        "vm_version" : 39500,
         "amount" : 0,
         "code" : "code",
         "call_data" : { },
@@ -4229,6 +4378,7 @@
         "fee" : 0,
         "gas" : 0,
         "deposit" : 0,
+        "abi_version" : 9606,
         "nonce" : 0,
         "ttl" : 0
       }
@@ -4253,7 +4403,13 @@
           "type" : "integer",
           "description" : "Virtual machine's version",
           "minimum" : 0,
-          "maximum" : 255
+          "maximum" : 65535
+        },
+        "abi_version" : {
+          "type" : "integer",
+          "description" : "ABI version",
+          "minimum" : 0,
+          "maximum" : 65535
         },
         "deposit" : {
           "type" : "integer",
@@ -4296,22 +4452,23 @@
       },
       "example" : {
         "gas_price" : 0,
-        "call" : "call",
-        "vm_version" : 153,
         "amount" : 0,
         "code" : "code",
         "owner_id" : "owner_id",
         "fee" : 0,
+        "nonce" : 0,
+        "ttl" : 0,
+        "call" : "call",
+        "vm_version" : 39500,
         "gas" : 0,
         "deposit" : 0,
-        "arguments" : "arguments",
-        "nonce" : 0,
-        "ttl" : 0
+        "abi_version" : 9606,
+        "arguments" : "arguments"
       }
     },
     "ContractCallTx" : {
       "type" : "object",
-      "required" : [ "amount", "call_data", "caller_id", "contract_id", "fee", "gas", "gas_price", "vm_version" ],
+      "required" : [ "amount", "call_data", "caller_id", "contract_id", "fee", "gas", "gas_price" ],
       "properties" : {
         "caller_id" : {
           "description" : "Contract caller pub_key",
@@ -4327,9 +4484,15 @@
         },
         "vm_version" : {
           "type" : "integer",
-          "description" : "Virtual machine's version",
+          "description" : "VM version",
           "minimum" : 0,
-          "maximum" : 255
+          "maximum" : 65535
+        },
+        "abi_version" : {
+          "type" : "integer",
+          "description" : "ABI version",
+          "minimum" : 0,
+          "maximum" : 65535
         },
         "fee" : {
           "type" : "integer",
@@ -4363,20 +4526,21 @@
       },
       "example" : {
         "gas_price" : 0,
-        "vm_version" : 153,
+        "vm_version" : 39500,
         "amount" : 0,
         "call_data" : { },
         "caller_id" : { },
         "contract_id" : null,
         "fee" : 0,
         "gas" : 0,
+        "abi_version" : 9606,
         "nonce" : 0,
         "ttl" : 0
       }
     },
     "ContractCallCompute" : {
       "type" : "object",
-      "required" : [ "amount", "caller_id", "contract_id", "fee", "gas", "gas_price", "vm_version" ],
+      "required" : [ "amount", "caller_id", "contract_id", "fee", "gas", "gas_price" ],
       "properties" : {
         "caller_id" : {
           "description" : "Contract caller pub_key",
@@ -4392,9 +4556,15 @@
         },
         "vm_version" : {
           "type" : "integer",
-          "description" : "Virtual machine's version",
+          "description" : "VM version",
           "minimum" : 0,
-          "maximum" : 255
+          "maximum" : 65535
+        },
+        "abi_version" : {
+          "type" : "integer",
+          "description" : "ABI version",
+          "minimum" : 0,
+          "maximum" : 65535
         },
         "fee" : {
           "type" : "integer",
@@ -4436,17 +4606,18 @@
       },
       "example" : {
         "gas_price" : 0,
-        "call" : "call",
-        "vm_version" : 153,
         "amount" : 0,
-        "caller_id" : { },
         "contract_id" : null,
         "fee" : 0,
+        "nonce" : 0,
+        "ttl" : 0,
+        "call" : "call",
+        "vm_version" : 39500,
+        "caller_id" : { },
         "function" : "function",
         "gas" : 0,
-        "arguments" : "arguments",
-        "nonce" : 0,
-        "ttl" : 0
+        "abi_version" : 9606,
+        "arguments" : "arguments"
       }
     },
     "UnsignedTx" : {
@@ -4519,18 +4690,19 @@
       "example" : {
         "micro_blocks" : [ { }, { } ],
         "key_block" : {
+          "prev_hash" : null,
+          "nonce" : 1,
+          "version" : 5,
+          "miner" : null,
+          "target" : 6,
           "beneficiary" : null,
           "state_hash" : null,
-          "prev_hash" : null,
           "pow" : "",
           "prev_key_hash" : null,
           "time" : 5,
-          "nonce" : 1,
-          "version" : 5,
           "hash" : { },
-          "miner" : null,
           "height" : 0,
-          "target" : 6
+          "info" : { }
         }
       }
     },
@@ -4618,8 +4790,15 @@
           },
           "vm_version" : {
             "type" : "integer",
-            "format" : "int64",
-            "description" : "VM version of the contract"
+            "description" : "VM version of the contract",
+            "minimum" : 0,
+            "maximum" : 65535
+          },
+          "abi_version" : {
+            "type" : "integer",
+            "description" : "ABI version of the contract",
+            "minimum" : 0,
+            "maximum" : 65535
           },
           "code" : {
             "$ref" : "#/definitions/ByteCode"
@@ -4641,7 +4820,7 @@
         "$ref" : "#/definitions/OffChainUpdate"
       }, {
         "type" : "object",
-        "required" : [ "amount", "call_data", "caller", "contract", "gas", "gas_price", "vm_version" ],
+        "required" : [ "amount", "call_data", "caller", "contract", "gas", "gas_price" ],
         "properties" : {
           "caller" : {
             "description" : "Contract caller",
@@ -4653,8 +4832,15 @@
           },
           "vm_version" : {
             "type" : "integer",
-            "format" : "int64",
-            "description" : "VM version of the contract"
+            "description" : "ABI version for the call/calldata",
+            "minimum" : 0,
+            "maximum" : 65535
+          },
+          "abi_version" : {
+            "type" : "integer",
+            "description" : "ABI version for the call/calldata",
+            "minimum" : 0,
+            "maximum" : 65535
           },
           "amount" : {
             "type" : "integer",
@@ -4677,6 +4863,53 @@
           }
         }
       } ]
+    },
+    "TokenSupply" : {
+      "type" : "object",
+      "properties" : {
+        "accounts" : {
+          "type" : "integer",
+          "description" : "Tokens in account balances"
+        },
+        "contracts" : {
+          "type" : "integer",
+          "description" : "Tokens in contracts"
+        },
+        "contract_oracles" : {
+          "type" : "integer",
+          "description" : "Tokens in contracts registered as oracles"
+        },
+        "locked" : {
+          "type" : "integer",
+          "description" : "Tokens locked (not owned by anyone)"
+        },
+        "oracles" : {
+          "type" : "integer",
+          "description" : "Tokens in accounts registered as oracles"
+        },
+        "oracle_queries" : {
+          "type" : "integer",
+          "description" : "Tokens in pending oracle queries"
+        },
+        "pending_rewards" : {
+          "type" : "integer",
+          "description" : "Tokens from fees and coinbase pending in the beneficiary reward delay"
+        },
+        "total" : {
+          "type" : "integer",
+          "description" : "Sum of all tokens from other fields"
+        }
+      },
+      "example" : {
+        "total" : 9,
+        "pending_rewards" : 7,
+        "oracles" : 5,
+        "accounts" : 0,
+        "contracts" : 6,
+        "locked" : 5,
+        "contract_oracles" : 1,
+        "oracle_queries" : 2
+      }
     },
     "inline_response_200" : {
       "properties" : {

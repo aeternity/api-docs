@@ -1,12 +1,6 @@
 
 function swaggerUrl(version) {
-  //backward compatibility
-  const oldPathVersions = ['v4.1.0', 'v4.2.0', 'v4.2.1', 'v5.0.0-rc.1'];
-  if (oldPathVersions.includes(version)) {
-    return `https://raw.githubusercontent.com/aeternity/aeternity/${version}/config/swagger.yaml`;
-  }
-
-  return `https://raw.githubusercontent.com/aeternity/aeternity/${version}/apps/aehttp/priv/swagger.yaml`;
+  return `https://raw.githubusercontent.com/aeternity/aeternity/${version}/apps/aehttp/priv/oas3.yaml`;
 }
 
 async function getLatestRelease() {
@@ -31,8 +25,9 @@ async function getSwaggerUrls() {
     const releases = await getRecentReleases();
 
     releases.push('master');
+    releases.push('open-api-servers');
 
-    return releases.map(v => {
+    return releases.filter(v => !v.startsWith('v0.0.0')).map(v => {
         return {
             name: v,
             url: swaggerUrl(v)

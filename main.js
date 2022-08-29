@@ -22,17 +22,17 @@ async function getRecentReleases() {
 }
 
 async function getSwaggerUrls() {
-    const releases = await getRecentReleases();
+    // const releases = await getRecentReleases();
 
-    releases.push('master');
-    releases.push('open-api-servers');
+    // releases.push('master');
 
-    return releases.filter(v => !v.startsWith('v0.0.0')).map(v => {
-        return {
-            name: v,
-            url: swaggerUrl(v)
-        };
-    });
+    // return releases.filter(v => !v.startsWith('v0.0.0')).map(v => {
+    //     return {
+    //         name: v,
+    //         url: swaggerUrl(v)
+    //     };
+    // });
+    return [{name: 'master', url: swaggerUrl('master')}]; // todo: replace once we have a release with updated oas3 spec that contains servers
 }
 
 async function load() {
